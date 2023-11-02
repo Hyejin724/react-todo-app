@@ -1,16 +1,9 @@
 import React from 'react'
+import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 
 export default function List({todoData, setTodoData}) {
     
 
-    const btnStyle = {
-        color : "#fff",
-        border : "none",
-        padding : "5px 9px",
-        borderRadius : "50%",
-        cursor : "pointer",
-        float : "right"
-       };
     
        const handleCompleteChange =(id) =>{
         let newTodoData = todoData.map(data => {
@@ -21,14 +14,6 @@ export default function List({todoData, setTodoData}) {
         })
         setTodoData(newTodoData);
       }
-
-      const getStyle = (completed) => {
-        return{
-          padding : "10px",
-          borderBottom : "1px #ccc dotted",
-          textDecoration : completed ? "line-through" : "none"
-        }
-       }
        
       const handleClick = (id) =>{
         let newTodoData = todoData.filter(data => data.id !== id)
@@ -38,13 +23,39 @@ export default function List({todoData, setTodoData}) {
 
   return (
     <div>
-        {todoData.map((data) => (
-            <div style={getStyle(data.completed)} key={data.id}>
-            <input type="checkbox" defaultChecked={false} onChange={()=>handleCompleteChange(data.id)}/>
-            {data.title}
-          <button style={btnStyle} onClick={() => handleClick(data.id)}>x</button>
-        </div>
+      <DragDropContext>
+        <Droppable droppableId='HI'>
+          {(provided)=>(
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+            
+        {todoData.map((data, index) => (
+
+          <Draggable key={data.id} draggableId = {data.id.toString()} index={index}>
+
+            {(provided, snapshot) => (
+
+            <div key={data.id} {...provided.draggableProps} ref={provided.innerRef} {...provided.dragHandleProps}
+            className ={`${snapshot.isDragging ? "bg-gray-400" : "bg-gray-100" } "flex items-center justify-between w-full px-4 py-1 my-2 text-gray-600 border rounded`}>
+           
+            <div className="items-center ">
+            <input type="checkbox" 
+            defaultChecked={data.completed} 
+            onChange={()=>handleCompleteChange(data.id)}/>{""}
+            <span className={data.completed ? "line-through":undefined}>{data.title}</span>
+            </div>
+            <div className ="px-4 py-1 float-right">
+          <button  onClick={() => handleClick(data.id)}>x</button>
+          
+            </div>
+            </div>
+            )}
+            </Draggable>
         ))}
+        {provided.placeholder}
+        </div>
+        )}
+        </Droppable>
+      </DragDropContext>
     </div>
   )
 }
